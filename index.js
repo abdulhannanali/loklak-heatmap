@@ -101,10 +101,6 @@
 		})
 	})
 
-	map.on("click", function (event) {
-		console.log(eve)
-	})
-
 	$("#switchHeatBtn").on("click", function (event) {
 		map.removeLayer(tweetLayer)
 		map.addLayer(heatMapLayer)
@@ -115,18 +111,35 @@
 		var coords = browserEvent.coordinate
 		// console.log(browserEvent)
 		var pixel = map.getPixelFromCoordinate(coords)
+		console.log(browserEvent)
 
+
+		var featuresNum = 0
 		map.forEachFeatureAtPixel(pixel, function (feature, resolution) {
+			if (featuresNum < 1) {
+				displayTweet(feature)
+			}
+			featuresNum++
 		})
 	})
+
+	function displayTweet(feature) {
+		var tweetDisplay = $("#tweetDisplay")
+		var tweetMessage = $("#tweetMessage")
+		var tweetUser = $("#tweetUser")
+
+		tweetDisplay.show()
+		tweetMessage.html(feature.get("text"))
+		tweetUser.text(feature.get("screen_name"))
+	}
 
 	
 	$("#nextTweetBtn").on("click", function (event) {
 		var features = tweetSource.getFeatures()
 		var feature = features[tweetsIterator]
 
-		var coordinate = feature.get("coords")
 
+		displayTweet(feature)
 		panToCoordinates(feature.getGeometry().flatCoordinates)
 		tweetsIterator++
 	})
@@ -137,9 +150,10 @@
 		}
 		else {
 			tweetsIterator--
-			var features = tweetSource.getFeatures()
+			var feature = tweetSource.getFeatures()[tweetsIterator]
 
-			panToCoordinates(features[tweetsIterator].getGeometry().flatCoordinates)
+			panToCoordinates(feature.getGeometry().flatCoordinates)
+			displayTweet(feature)
 		}
 
 
@@ -160,11 +174,6 @@
 	$("#animationBtn").on("click", function (event) {
 		var okaraLocation = ol.proj.transform([30, 20], "EPSG:4326", "EPSG:3857")
 	})
-
-	function displayTweet() {
-
-	}
-
 
 	function addTweetsInMap(tweet) {
 		tweetsIterator = 0
